@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Monster Kart Oyunu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h2>Kartları yığ! (5 ədəd)</h2>
+<p id="score">Kart: 0 / 5</p>
+
+<div id="game">
+    <div id="player"></div>
+    <div id="monster"></div>
+</div>
+
+<img id="jumpscare" src="https://i.imgur.com/8QfQY5H.png">
+
+<audio id="scareSound" src="https://www.myinstants.com/media/sounds/scream.mp3"></audio>
+<audio id="nearSound" src="https://www.myinstants.com/media/sounds/horror-ambience.mp3" loop></audio>
+
+<script src="script.js"></script>
+</body>
+</html>

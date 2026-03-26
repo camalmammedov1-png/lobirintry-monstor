@@ -1,0 +1,174 @@
+// ===== ELEMENTLƏR =====
+const player = document.getElementById("player");
+const monster = document.getElementById("monster");
+const game = document.getElementById("game");
+const scoreText = document.getElementById("score");
+
+const scareSound = document.getElementById("scareSound");
+const nearSound = document.getElementById("nearSound");
+const jumpscare = document.getElementById("jumpscare");
+
+// ===== STATLAR =====
+let px=50, py=50;
+let mx=500, my=300;
+
+let score=0;
+let level=1;
+let health=3;
+
+let monsterSpeed=2;
+
+const ui=document.createElement("p");
+document.body.appendChild(ui);
+
+updateUI();
+
+
+// ===== FƏNƏR (DARK EFFECT) =====
+const light=document.createElement("div");
+light.style.position="fixed";
+light.style.top=0;
+light.style.left=0;
+light.style.width="100%";
+light.style.height="100%";
+light.style.pointerEvents="none";
+light.style.background=
+"radial-gradient(circle 120px at 50px 50px, transparent 0%, black 70%)";
+document.body.appendChild(light);
+
+
+// ===== KART YARAT =====
+function spawnCards(){
+    document.querySelectorAll(".card").forEach(c=>c.remove());
+
+    for(let i=0;i<5;i++){
+        let card=document.createElement("div");
+        card.className="card";
+        card.style.left=Math.random()*560+"px";
+        card.style.top=Math.random()*360+"px";
+        game.appendChild(card);
+    }
+}
+
+spawnCards();
+
+
+// ===== HƏRƏKƏT =====
+document.addEventListener("keydown", e=>{
+    let speed=10;
+
+    if(e.key==="ArrowUp") py-=speed;
+    if(e.key==="ArrowDown") py+=speed;
+    if(e.key==="ArrowLeft") px-=speed;
+    if(e.key==="ArrowRight") px+=speed;
+
+    player.style.left=px+"px";
+    player.style.top=py+"px";
+
+    // fənər playeri izləyir
+    light.style.background=
+`radial-gradient(circle 120px at ${px+15}px ${py+15}px,
+transparent 0%, black 70%)`;
+
+    checkCards();
+});
+
+
+// ===== KART YIĞMA =====
+function checkCards(){
+    document.querySelectorAll(".card").forEach(card=>{
+        let cx=card.offsetLeft;
+        let cy=card.offsetTop;
+
+        if(Math.abs(px-cx)<20 && Math.abs(py-cy)<20){
+            card.remove();
+            score++;
+            updateUI();
+
+            if(score%5===0){
+                levelUp();
+            }
+        }
+    });
+}
+
+
+// ===== LEVEL SYSTEM =====
+function levelUp(){
+    level++;
+    monsterSpeed+=1;
+    spawnCards();
+    alert("LEVEL "+level+" 😈");
+}
+
+
+// ===== AĞILLI MONSTER AI =====
+setInterval(()=>{
+
+    let dx=px-mx;
+    let dy=py-my;
+
+    let dist=Math.hypot(dx,dy);
+
+    // istiqamət hesablayır
+    mx+=dx/dist*monsterSpeed;
+    my+=dy/dist*monsterSpeed;
+
+    monster.style.left=mx+"px";
+    monster.style.top=my+"px";
+
+    // pseudo 3D zoom effekti
+    monster.style.transform=`scale(${1+(200/dist)})`;
+
+    // yaxınlaşanda qorxu musiqisi
+    if(dist<180){
+        nearSound.play();
+    } else {
+        nearSound.pause();
+    }
+
+    // toxunanda can azalır
+    if(dist<25){
+        hitPlayer();
+    }
+
+},120);
+
+
+// ===== CAN SİSTEMİ =====
+let damageCooldown=false;
+
+function hitPlayer(){
+    if(damageCooldown) return;
+
+    health--;
+    updateUI();
+    damageCooldown=true;
+
+    player.style.background="white";
+    setTimeout(()=>player.style.background="lime",300);
+    setTimeout(()=>damageCooldown=false,1000);
+
+    if(health<=0){
+        gameOver();
+    }
+}
+
+
+// ===== GAME OVER =====
+function gameOver(){
+    jumpscare.style.display="block";
+    scareSound.play();
+
+    setTimeout(()=>{
+        alert("GAME OVER 💀");
+        location.reload();
+    },1500);
+}
+
+
+// ===== UI =====
+function updateUI(){
+    scoreText.innerText=`Kart: ${score}`;
+    ui.innerText=`❤️ Can: ${health} | Level: ${level}`;
+}
